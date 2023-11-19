@@ -20,15 +20,13 @@ func init() {
 type Config struct {
 	ServiceName string           `mapstructure:"serviceName"`
 	Logger      logger.LogConfig `mapstructure:"logger"`
+	JWTConfig   JWTConfig        `mapstructure:"jwt"`
 }
 
-type Http struct {
-	Port                string   `mapstructure:"port" validate:"required"`
-	Development         bool     `mapstructure:"development"`
-	BasePath            string   `mapstructure:"basePath" validate:"required"`
-	BankAccountsPath    string   `mapstructure:"bankAccountsPath" validate:"required"`
-	DebugErrorsResponse bool     `mapstructure:"debugErrorsResponse"`
-	IgnoreLogUrls       []string `mapstructure:"ignoreLogUrls"`
+type JWTConfig struct {
+	JWTTTL        int64  `mapstructure:"jwtTTL"`
+	JWTSecret     string `mapstructure:"jwtSecret"`
+	SigningMethod string `mapstructure:"signingMethod"`
 }
 
 func InitConfig() (*Config, error) {
