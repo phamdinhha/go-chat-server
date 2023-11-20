@@ -1,13 +1,15 @@
 package controllers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type AuthController interface {
-	Login() fiber.Handler
-	SignUp() fiber.Handler
+	Login(c *gin.Context)
+	SignUp(c *gin.Context)
 }
 
 type ChatController interface {
-	CreateRoom() fiber.Handler
-	ListMessageByRoom() fiber.Handler
+	CreateRoom(c *gin.Context)
+	ListMessageByRoom(c *gin.Context)
 }

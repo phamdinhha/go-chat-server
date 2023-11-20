@@ -15,12 +15,12 @@ import (
 
 type auth struct {
 	userRepo repositories.UserRepo
-	cfg      config.Config
+	cfg      *config.Config
 }
 
 func NewAuthService(
 	userRepo repositories.UserRepo,
-	cfg config.Config,
+	cfg *config.Config,
 ) AuthenService {
 	return &auth{
 		userRepo: userRepo,

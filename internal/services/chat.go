@@ -17,12 +17,12 @@ type chatService struct {
 func NewChatService(
 	chatRepo repositories.ChatRepo,
 	roomRepo repositories.ChatRoomRepo,
-	cfg config.Config,
+	cfg *config.Config,
 ) ChatService {
 	return &chatService{
 		chatRepo: chatRepo,
 		roomRepo: roomRepo,
-		cfg:      cfg,
+		cfg:      *cfg,
 	}
 }
 

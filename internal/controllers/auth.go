@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	"github.com/phamdinhha/go-chat-server/internal/dto"
 	"github.com/phamdinhha/go-chat-server/internal/services"
-	"github.com/phamdinhha/go-chat-server/pkg/http_response"
 )
 
 type authController struct {
@@ -17,30 +18,32 @@ func NewAuthController(authService services.AuthenService) AuthController {
 	}
 }
 
-func (a *authController) Login() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		req := dto.LoginRequest{}
-		if err := c.BodyParser(&req); err != nil {
-			return http_response.ErrorCtxResponse(c, err)
-		}
-		user, err := a.authService.Login(c.Context(), req)
-		if err != nil {
-			return http_response.ErrorCtxResponse(c, err)
-		}
-		return http_response.CtxResponse(c, fiber.StatusOK, user, nil)
+func (a *authController) Login(c *gin.Context) {
+	req := dto.LoginRequest{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+	user, err := a.authService.Login(c, req)
+	if err != nil {
+		c.JSON(http.StatusNotAcceptable, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+	return
 }
 
-func (a *authController) SignUp() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		req := dto.SignUpRequest{}
-		if err := c.BodyParser(&req); err != nil {
-			return http_response.ErrorCtxResponse(c, err)
-		}
-		user, err := a.authService.SignUp(c.Context(), req)
-		if err != nil {
-			return http_response.ErrorCtxResponse(c, err)
-		}
-		return http_response.CtxResponse(c, fiber.StatusOK, user, nil)
+func (a *authController) SignUp(c *gin.Context) {
+	req := dto.SignUpRequest{}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+	user, err := a.authService.SignUp(c, req)
+	if err != nil {
+		c.JSON(http.StatusNotAcceptable, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+	return
 }

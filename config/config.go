@@ -14,19 +14,36 @@ import (
 var configPath string
 
 func init() {
-	flag.StringVar(&configPath, "config", "", "BankAccount microservice config path")
+	flag.StringVar(&configPath, "config", "", "Go chat server config path")
 }
 
 type Config struct {
 	ServiceName string           `mapstructure:"serviceName"`
 	Logger      logger.LogConfig `mapstructure:"logger"`
 	JWTConfig   JWTConfig        `mapstructure:"jwt"`
+	Postgres    PostgresConfig   `mapstructure:"postgres"`
+	Server      Server           `mapstructure:"server"`
 }
 
 type JWTConfig struct {
 	JWTTTL        int64  `mapstructure:"jwtTTL"`
 	JWTSecret     string `mapstructure:"jwtSecret"`
 	SigningMethod string `mapstructure:"signingMethod"`
+}
+
+type Server struct {
+	Host string `mapstructure:"host"`
+	Port string `mapstructure:"port"`
+}
+
+type PostgresConfig struct {
+	PostgresqlHost     string `mapstructure:"postgresqlHost"`
+	PostgresqlPort     string `mapstructure:"postgresqlPort"`
+	PostgresqlUser     string `mapstructure:"postgresqlUser"`
+	PostgresqlPassword string `mapstructure:"postgresqlPassword"`
+	PostgresqlDbname   string `mapstructure:"postgresqlDbname"`
+	PostgresqlSSLMode  bool   `mapstructure:"postgresqlSSLMode"`
+	PgDriver           string `mapstructure:"pgDriver"`
 }
 
 func InitConfig() (*Config, error) {
