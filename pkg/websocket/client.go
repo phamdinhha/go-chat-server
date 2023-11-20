@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 )
@@ -33,6 +34,8 @@ func (c *Client) Read(bodyChan chan []byte) {
 		}
 		var body Body
 		err = json.Unmarshal(p, &body)
+		fmt.Println(p)
+		fmt.Println(body)
 		if err != nil {
 			c.Pool.Unregister <- c
 			c.Connection.Close()

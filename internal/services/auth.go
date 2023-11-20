@@ -58,7 +58,7 @@ func (a *auth) Login(ctx context.Context, req dto.LoginRequest) (dto.LoginRespon
 }
 
 func (a *auth) SignUp(ctx context.Context, req dto.SignUpRequest) (dto.SignUpResponse, error) {
-	userCheck, err := a.userRepo.GetUserByEmail(ctx, req.Email)
+	userCheck, _ := a.userRepo.GetUserByEmail(ctx, req.Email)
 	if userCheck != nil {
 		return dto.SignUpResponse{}, http_error.ErrDuplicateEmail
 	}
@@ -69,6 +69,7 @@ func (a *auth) SignUp(ctx context.Context, req dto.SignUpRequest) (dto.SignUpRes
 	}
 	hPS := string(hashedPassword)
 	user := &models.User{
+		ID:       req.Email,
 		UserName: req.UserName,
 		Email:    req.Email,
 		Password: hPS,

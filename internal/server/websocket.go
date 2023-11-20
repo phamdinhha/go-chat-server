@@ -6,11 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 	"github.com/phamdinhha/go-chat-server/config"
 	"github.com/phamdinhha/go-chat-server/pkg/http_error"
-	"github.com/phamdinhha/go-chat-server/pkg/http_response"
 	"github.com/phamdinhha/go-chat-server/pkg/websocket"
 )
 
@@ -104,7 +102,10 @@ func handleWebsocketAuthenticationErr(w http.ResponseWriter, err error) {
 	log.Println("websocket error: ", err)
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	res := http_response.ErrorCtxResponse(&fiber.Ctx{}, err)
+	res := map[string]interface{}{
+		"data":   []string{},
+		"errors": err.Error(),
+	}
 	data, _ := json.Marshal(res)
 	w.Write(data)
 }

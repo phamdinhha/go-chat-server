@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/go-chat-server/internal/models"
@@ -27,6 +28,7 @@ func (r *userRepo) CreateUser(ctx context.Context, req *models.User) (*models.Us
 		req.Email,
 		req.Password,
 	).StructScan(createdUser); err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	return createdUser, nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,24 +11,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/phamdinhha/go-chat-server/config"
 	"github.com/phamdinhha/go-chat-server/internal/server"
+	"github.com/phamdinhha/go-chat-server/pkg/boot"
 	"github.com/phamdinhha/go-chat-server/pkg/postgres"
 )
 
 func main() {
-	if err := startServer(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	var ctx = context.Background()
+	boot.BootstrapDaemons(ctx, StartServer)
 }
 
-func startServer() error {
+func StartServer(ctx context.Context) (shutdown boot.Daemon, err error) {
 	cfg, err := config.InitConfig()
 	if err != nil {
-		return err
+		panic(err)
 	}
 	db, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	ginEngine := gin.New()
 	ginEngine.Use(gin.Logger())
@@ -56,15 +56,18 @@ func startServer() error {
 			panic(err)
 		}
 	}()
-	return nil
 
-	// shutdown = func() {
-	// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// 	defer cancel()
-	// 	if err := httpServer.Shutdown(ctx); err != nil {
-	// 		fmt.Fprintf(os.Stderr, "%v\n", err)
-	// 		panic(err)
-	// 	}
-	// }
-	// return shut
+	shutdown = func() {
+		<-ctx.Done()
+
+		if err := httpServer.Shutdown(context.Background()); err != nil {
+			// s.log.Errorf("Shutdown server error: %v", err)
+			fmt.Println(err)
+			return
+		}
+
+		// s.log.Info("Gracefully shutdown server")
+		fmt.Println("Gracefully shutdown server")
+	}
+	return shutdown, err
 }

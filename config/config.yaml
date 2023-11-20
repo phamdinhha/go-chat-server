@@ -13,11 +13,11 @@ postgres:
   postgresqlHost: "localhost"
   postgresqlPort: 5432
   postgresqlUser: "chat_user"
-  postgresqlPassword: "chat_password"
+  postgresqlPassword: "chat_pass"
   postgresqlDbname: "chat_db"
-  postgresqlSSLMode: "disable"
-  pgDriver: "postgres"
+  postgresqlSSLMode: false
+  pgDriver: "pgx"
 
 server:
-  host: "localhost"
-  port: 8000
+  host: 0.0.0.0
+  port: 8001
