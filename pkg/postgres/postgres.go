@@ -1,59 +1,43 @@
 package postgres
 
 import (
-	"context"
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pkg/errors"
+	_ "github.com/jackc/pgx/stdlib" // pgx driver
+	"github.com/jmoiron/sqlx"
+	"github.com/phamdinhha/go-chat-server/config"
 )
-
-type Config struct {
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	DBName   string `yaml:"dbName"`
-	SSLMode  bool   `yaml:"sslMode"`
-	Password string `yaml:"password"`
-}
 
 const (
-	maxConn           = 50
-	healthCheckPeriod = 1 * time.Minute
-	maxConnIdleTime   = 1 * time.Minute
-	maxConnLifetime   = 3 * time.Minute
-	minConns          = 10
-	lazyConnect       = false
+	maxOpenConns    = 60
+	connMaxLifetime = 120
+	maxIdleConns    = 30
+	connMaxIdleTime = 20
 )
 
-// NewPgxConn pool
-func NewPgxConn(cfg Config) (*pgxpool.Pool, error) {
-	ctx := context.Background()
-	dataSourceName := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
-		cfg.Host,
-		cfg.Port,
-		cfg.User,
-		cfg.DBName,
-		cfg.Password,
+// Return new Postgresql db instance
+func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
+	dataSourceName := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
+		c.Postgres.PostgresqlHost,
+		c.Postgres.PostgresqlPort,
+		c.Postgres.PostgresqlUser,
+		c.Postgres.PostgresqlDbname,
+		c.Postgres.PostgresqlPassword,
 	)
 
-	poolCfg, err := pgxpool.ParseConfig(dataSourceName)
+	db, err := sqlx.Connect(c.Postgres.PgDriver, dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	poolCfg.MaxConns = maxConn
-	poolCfg.HealthCheckPeriod = healthCheckPeriod
-	poolCfg.MaxConnIdleTime = maxConnIdleTime
-	poolCfg.MaxConnLifetime = maxConnLifetime
-	poolCfg.MinConns = minConns
-	poolCfg.LazyConnect = lazyConnect
-
-	connPool, err := pgxpool.ConnectConfig(ctx, poolCfg)
-	if err != nil {
-		return nil, errors.Wrap(err, "pgx.ConnectConfig")
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetConnMaxLifetime(connMaxLifetime * time.Second)
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetConnMaxIdleTime(connMaxIdleTime * time.Second)
+	if err = db.Ping(); err != nil {
+		return nil, err
 	}
 
-	return connPool, nil
+	return db, nil
 }

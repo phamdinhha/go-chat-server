@@ -1,0 +1,23 @@
+serviceName: "go-chat-server"
+logger:
+  level: "debug"
+  devMode: true
+  encoder: "json"
+
+jwt:
+  jwtTTL: 3600
+  jwtSecret: "this-is-a-secret"
+  signingMethod: "HS256"
+
+postgres:
+  postgresqlHost: "localhost"
+  postgresqlPort: 5432
+  postgresqlUser: "chat_user"
+  postgresqlPassword: "chat_pass"
+  postgresqlDbname: "chat_db"
+  postgresqlSSLMode: false
+  pgDriver: "pgx"
+
+server:
+  host: 0.0.0.0
+  port: 8001

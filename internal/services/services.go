@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/phamdinhha/go-chat-server/internal/dto"
 	"github.com/phamdinhha/go-chat-server/internal/models"
 )
 
@@ -12,11 +13,12 @@ type UserService interface {
 }
 
 type ChatService interface {
+	CreateRoom(ctx context.Context, name string) (*models.ChatRoom, error)
 	ListByRoomId(ctx context.Context, roomID string) ([]*models.Chat, error)
 	CreateMessge(ctx context.Context, chat *models.Chat) (*models.Chat, error)
 }
 
 type AuthenService interface {
-	Login(ctx context.Context, email, password string) (string, error)
-	SignUp(ctx context.Context, user *models.User) error
+	Login(ctx context.Context, req dto.LoginRequest) (dto.LoginResponse, error)
+	SignUp(ctx context.Context, req dto.SignUpRequest) (dto.SignUpResponse, error)
 }

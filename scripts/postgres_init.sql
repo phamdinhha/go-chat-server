@@ -1,0 +1,5 @@
+CREATE DATABASE chat_db;
+
+CREATE USER chat_user;
+ALTER USER chat_user WITH PASSWORD 'chat_pass';
+ALTER USER chat_user WITH SUPERUSER;
