@@ -34,7 +34,11 @@ func (c *Client) Read(bodyChan chan []byte) {
 		}
 		var body Body
 		err = json.Unmarshal(p, &body)
-		fmt.Println(p)
+		fmt.Println("Message type: ")
+		fmt.Println(messageType)
+		fmt.Println("raw message body: ")
+		fmt.Println(string(p))
+		fmt.Println("parsed message body: ")
 		fmt.Println(body)
 		if err != nil {
 			c.Pool.Unregister <- c

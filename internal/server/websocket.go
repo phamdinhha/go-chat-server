@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/phamdinhha/go-chat-server/config"
 	"github.com/phamdinhha/go-chat-server/pkg/http_error"
 	"github.com/phamdinhha/go-chat-server/pkg/websocket"
@@ -39,18 +40,20 @@ import (
 // }
 
 type wsController struct {
-	cfg *config.Config
+	cfg    *config.Config
+	wsPool *websocket.Pool
 }
 
-func NewWSController(cfg *config.Config) *wsController {
+func NewWSController(cfg *config.Config, wsPool *websocket.Pool) *wsController {
 	return &wsController{
-		cfg: cfg,
+		cfg:    cfg,
+		wsPool: wsPool,
 	}
 }
 
 func (ws *wsController) WSHandler(w http.ResponseWriter, r *http.Request) {
-	pool := websocket.NewPool()
-	go pool.Start()
+	// pool := websocket.NewPool()
+	// go pool.Start()
 	jwtToken := r.URL.Query().Get("token")
 	jwtSecret := ws.cfg.JWTConfig.JWTSecret
 	parsedToken, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
@@ -68,7 +71,7 @@ func (ws *wsController) WSHandler(w http.ResponseWriter, r *http.Request) {
 		handleWebsocketAuthenticationErr(w, http_error.ErrInvalidCredentials)
 		return
 	}
-	serverWS(pool, w, r, claims)
+	serverWS(ws.wsPool, w, r, claims)
 }
 
 func (ws *wsController) WSGinHandler(c *gin.Context) {
@@ -76,7 +79,9 @@ func (ws *wsController) WSGinHandler(c *gin.Context) {
 }
 
 var RegisterWebsocketRoute = func(router *gin.RouterGroup, cfg *config.Config) {
-	wsController := NewWSController(cfg)
+	pool := websocket.NewPool()
+	go pool.Start()
+	wsController := NewWSController(cfg, pool)
 	router.GET("", wsController.WSGinHandler)
 }
 
@@ -87,6 +92,7 @@ func serverWS(pool *websocket.Pool, w http.ResponseWriter, r *http.Request, clai
 		return
 	}
 	client := &websocket.Client{
+		ID:         uuid.New().String(),
 		Connection: conn,
 		Pool:       pool,
 		Email:      claims["email"].(string),
@@ -99,7 +105,6 @@ func serverWS(pool *websocket.Pool, w http.ResponseWriter, r *http.Request, clai
 }
 
 func handleWebsocketAuthenticationErr(w http.ResponseWriter, err error) {
-	log.Println("websocket error: ", err)
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	res := map[string]interface{}{

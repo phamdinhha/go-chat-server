@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
@@ -66,6 +67,8 @@ func (p *Pool) Start() {
 	for {
 		select {
 		case client := <-p.Register:
+			fmt.Println("registering client")
+			fmt.Println(client.ID)
 			p.AddClient(client)
 		case client := <-p.Unregister:
 			p.RemoveClient(client)
