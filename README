@@ -1,6 +1,4 @@
-# Chat Application
-
-This is a chat bot server demo using Go + Websocket
+Chat bot server demo using Go + Websocket
 
 ## Overview
 
@@ -30,3 +28,4 @@ git clone https://github.com/yourusername/chat-application.git
 cd chat-application
 go build -v -o chat-server .
 ./chat-server
+```
