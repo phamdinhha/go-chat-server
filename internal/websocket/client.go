@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
 	ID         string
+	RoomID     uuid.UUID
 	Connection *websocket.Conn
 	Pool       *Pool
 	Email      string
@@ -28,30 +30,29 @@ func (c *Client) Read(bodyChan chan []byte) {
 	for {
 		messageType, p, err := c.Connection.ReadMessage()
 		if err != nil {
+			fmt.Println("break read message")
 			c.Pool.Unregister <- c
 			c.Connection.Close()
 			break
 		}
 		var body Body
 		err = json.Unmarshal(p, &body)
-		fmt.Println("Message type: ")
-		fmt.Println(messageType)
-		fmt.Println("raw message body: ")
-		fmt.Println(string(p))
 		fmt.Println("parsed message body: ")
 		fmt.Println(body)
 		if err != nil {
+			fmt.Println("break read message")
 			c.Pool.Unregister <- c
 			c.Connection.Close()
 			break
 		}
 		body.UserID = c.Email
 		message := Message{
-			Type: messageType,
-			Body: body,
+			Type:     messageType,
+			Body:     body,
+			ClientID: c.ID,
 		}
 		c.Pool.Broadcast <- message
-		bodyChan <- p
+		// bodyChan <- p
 		// save to db
 
 	}

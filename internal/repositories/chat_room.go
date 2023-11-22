@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/phamdinhha/go-chat-server/internal/models"
@@ -22,9 +23,9 @@ func (r *chatRoomRepo) CreateRoom(ctx context.Context, room *models.ChatRoom) (*
 	if err := r.db.QueryRowxContext(
 		ctx,
 		CREATE_ROOM_QUERY,
-		room.ID,
 		room.Name,
 	).StructScan(createdRoom); err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	return createdRoom, nil

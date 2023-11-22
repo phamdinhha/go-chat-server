@@ -8,14 +8,15 @@ import (
 )
 
 type Message struct {
-	Type int `json:"Type,obmitempty"`
-	Body Body
+	Type     int `json:"Type,omitempty"`
+	Body     Body
+	ClientID string `json:"client_id"`
 }
 
 type Body struct {
-	RoomID uuid.UUID `json:"room_id"`
-	Mesage string    `json:"message"`
-	UserID string    `json:"user_id"`
+	RoomID  uuid.UUID `json:"room_id"`
+	Message string    `json:"message"`
+	UserID  string    `json:"user_id"`
 }
 
 type Pool struct {
@@ -40,6 +41,7 @@ func (p *Pool) AddClient(client *Client) {
 	p.clientsMux.Lock()
 	defer p.clientsMux.Unlock()
 	p.Clients[client.ID] = client
+	fmt.Println("adding client: ", p.Clients)
 }
 
 func (p *Pool) RemoveClient(client *Client) {
@@ -57,7 +59,14 @@ func (p *Pool) GetClientByID(clientID string) *Client {
 func (p *Pool) BroadcastMessage(message Message) {
 	p.clientsMux.Lock()
 	defer p.clientsMux.Unlock()
+	fmt.Println("client: ", p.Clients)
+	var targetClients []*Client
 	for _, client := range p.Clients {
+		if client.RoomID == message.Body.RoomID && client.ID != message.ClientID {
+			targetClients = append(targetClients, client)
+		}
+	}
+	for _, client := range targetClients {
 		client.Send(message)
 	}
 }
